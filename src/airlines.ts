@@ -1,0 +1,92 @@
+// regional flights are sold under these brands, which is the name passengers know.
+// each one points at the iata code of the mainline airline whose logo they fly with
+export const MARKETING_BRANDS: Record<string, string> = {
+  'American Eagle': 'AA',
+  'Delta Connection': 'DL',
+  'United Express': 'UA',
+  'Alaska Horizon': 'AS',
+  'Air Canada Express': 'AC',
+}
+
+// major airlines by icao callsign prefix, pointing at the iata code their logo is filed under
+export const MAJOR_AIRLINES: Record<string, string> = {
+  // united states
+  AAL: 'AA',
+  DAL: 'DL',
+  UAL: 'UA',
+  SWA: 'WN',
+  ASA: 'AS',
+  JBU: 'B6',
+  NKS: 'NK',
+  FFT: 'F9',
+  HAL: 'HA',
+  AAY: 'G4',
+  SCX: 'SY',
+  MXY: 'MX',
+  VXP: 'XP',
+  FDX: 'FX',
+
+  // canada and latin america
+  ACA: 'AC',
+  WJA: 'WS',
+  TSC: 'TS',
+  POE: 'PD',
+  AMX: 'AM',
+  VOI: 'Y4',
+  AVA: 'AV',
+  CMP: 'CM',
+  LAN: 'LA',
+  TAM: 'JJ',
+  GLO: 'G3',
+  AZU: 'AD',
+  ARG: 'AR',
+
+  // europe
+  BAW: 'BA',
+  VIR: 'VS',
+  DLH: 'LH',
+  AFR: 'AF',
+  KLM: 'KL',
+  IBE: 'IB',
+  EIN: 'EI',
+  SWR: 'LX',
+  AUA: 'OS',
+  SAS: 'SK',
+  TAP: 'TP',
+  FIN: 'AY',
+  ICE: 'FI',
+  ITY: 'AZ',
+  LOT: 'LO',
+  BEL: 'SN',
+  EZY: 'U2',
+  RYR: 'FR',
+  NAX: 'DY',
+
+  // middle east and africa
+  UAE: 'EK',
+  QTR: 'QR',
+  ETD: 'EY',
+  THY: 'TK',
+  ELY: 'LY',
+  SVA: 'SV',
+  RJA: 'RJ',
+  ETH: 'ET',
+  RAM: 'AT',
+
+  // asia and the pacific
+  JAL: 'JL',
+  ANA: 'NH',
+  KAL: 'KE',
+  AAR: 'OZ',
+  CPA: 'CX',
+  SIA: 'SQ',
+  QFA: 'QF',
+  ANZ: 'NZ',
+  CCA: 'CA',
+  CES: 'MU',
+  CSN: 'CZ',
+  EVA: 'BR',
+  CAL: 'CI',
+  AIC: 'AI',
+  PAL: 'PR',
+}

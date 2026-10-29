@@ -140,7 +140,15 @@ function App() {
       <SkyBackground weather={weather} />
       <main className="screen">{content}</main>
       <footer className="footer">
-        Data: adsb.lol, <a href="https://adsb.fi">adsb.fi</a>, adsbdb, Open-Meteo
+        <p>
+          Data: adsb.lol, <a href="https://adsb.fi">adsb.fi</a>, adsbdb, Open-Meteo. Logos: avs.io
+        </p>
+        <p>Only commercial airline flights are shown. Private and local planes are left out.</p>
+        <p>
+          Airline names and logos are trademarks of their owners and are used only to identify
+          flights. Flight Overhead is not affiliated with or endorsed by any airline.
+        </p>
+        <p>© 2026 Josh Cohn</p>
       </footer>
     </div>
   )

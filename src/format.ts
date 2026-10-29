@@ -1,4 +1,5 @@
 import { AIRLINER_TYPES } from './aircraftTypes'
+import { MAJOR_AIRLINES, MARKETING_BRANDS } from './airlines'
 import { AIRLINE_CALLSIGN_PATTERN, compassWord, skyHeight } from './overhead'
 import type { SkyPlane } from './overhead'
 import type { AircraftInfo, Airport, Plane, Route } from './types'
@@ -8,15 +9,6 @@ const MPH_PER_KNOT = 1.15078
 
 // anything slower than this is basically level flight
 const LEVEL_FLIGHT_FPM = 250
-
-// regional flights are sold under these brands, which is the name passengers know
-const MARKETING_BRANDS = [
-  'American Eagle',
-  'Delta Connection',
-  'United Express',
-  'Alaska Horizon',
-  'Air Canada Express',
-]
 
 const SKY_PHRASES = {
   high: 'high in the sky',
@@ -56,7 +48,7 @@ function marketingBrand(operator: string, info: AircraftInfo | null): string | n
   }
 
   const owner = info.owner.toLowerCase()
-  const brand = MARKETING_BRANDS.find((name) => name.toLowerCase() === owner)
+  const brand = Object.keys(MARKETING_BRANDS).find((name) => name.toLowerCase() === owner)
   if (brand === undefined) {
     return null
   }
@@ -95,6 +87,23 @@ export function operatedByLine(plane: Plane, route: Route | null, info: Aircraft
     return null
   }
   return `Operated by ${route.airline}`
+}
+
+// iata code for the logo, only for major airlines and the regional brands they sell
+export function airlineLogoCode(plane: Plane, route: Route | null, info: AircraftInfo | null): string | null {
+  if (plane.callsign === null) {
+    return null
+  }
+
+  if (route !== null && route.airline !== null) {
+    const brand = marketingBrand(route.airline, info)
+    if (brand !== null) {
+      return MARKETING_BRANDS[brand]
+    }
+  }
+
+  const prefix = plane.callsign.slice(0, 3)
+  return MAJOR_AIRLINES[prefix] ?? null
 }
 
 // type names come in all caps, so soften the plain words

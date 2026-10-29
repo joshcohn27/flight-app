@@ -85,6 +85,13 @@ figure {
   gap: 12px;
 }
 
+.card-top {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+}
+
 .label {
   color: var(--accent);
   font-size: 1.3rem;
@@ -219,7 +226,7 @@ figure {
 .other-top {
   display: flex;
   gap: 12px;
-  align-items: baseline;
+  align-items: center;
   color: var(--text);
   font-weight: bold;
 }
@@ -262,7 +269,38 @@ figure {
   padding-top: 20px;
   color: var(--faint);
   font-size: 0.75rem;
+  line-height: 1.4;
   text-align: center;
+}
+
+.footer p + p {
+  margin-top: 6px;
+}
+
+/* logos sit on a white badge so they read on any sky */
+.logo {
+  display: inline-flex;
+  flex-shrink: 0;
+  box-sizing: border-box;
+  background: #ffffff;
+}
+
+.logo img {
+  display: block;
+  height: 100%;
+  width: auto;
+}
+
+.logo-large {
+  height: 52px;
+  padding: 6px 10px;
+  border-radius: 10px;
+}
+
+.logo-small {
+  height: 30px;
+  padding: 3px 6px;
+  border-radius: 6px;
 }
 
 /* sky backgrounds, picked from the local weather */
