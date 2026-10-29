@@ -1,4 +1,11 @@
-import { aircraftLabel, flightTitle, formatAltitude, formatMiles, lookPhrase } from '../format'
+import {
+  aircraftLabel,
+  flightTitle,
+  formatAltitude,
+  formatMiles,
+  lookPhrase,
+  operatedByLine,
+} from '../format'
 import { aircraftLookup, readLookup, routeLookup } from '../hooks/useLookups'
 import type { OverheadResult } from '../overhead'
 import RouteText from './RouteText'
@@ -12,6 +19,7 @@ function MainCard({ result }: MainCardProps) {
   const route = readLookup(routeLookup, main.plane.callsign)
   const info = readLookup(aircraftLookup, main.plane.hex)
   const aircraft = aircraftLabel(main.plane, info)
+  const operatedBy = operatedByLine(main.plane, route, info)
 
   const altitude = formatAltitude(main.altitudeFeet)
   const distance = formatMiles(main.distanceMeters)
@@ -19,7 +27,8 @@ function MainCard({ result }: MainCardProps) {
   return (
     <section className="main-card">
       <p className="label">{label}</p>
-      <h1 className="title">{flightTitle(main.plane, route)}</h1>
+      <h1 className="title">{flightTitle(main.plane, route, info)}</h1>
+      {operatedBy !== null && <p className="operated-by">{operatedBy}</p>}
       {route !== null && (
         <p className="route">
           <RouteText route={route} />

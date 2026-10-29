@@ -98,6 +98,13 @@ figure {
   overflow-wrap: anywhere;
 }
 
+/* sits tight under the big line so it reads as part of it */
+.operated-by {
+  margin-top: -6px;
+  color: var(--muted);
+  font-size: clamp(1.1rem, 4.8vw, 1.5rem);
+}
+
 .route {
   font-size: clamp(1.75rem, 8vw, 3.25rem);
   font-weight: bold;

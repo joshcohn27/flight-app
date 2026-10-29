@@ -12,6 +12,15 @@ const LEVEL_FLIGHT_FPM = 250
 // icao airline prefix followed by the flight number, like UAL1234
 const AIRLINE_CALLSIGN_PATTERN = /^[A-Z]{3}(\d[A-Z0-9]*)$/
 
+// regional flights are sold under these brands, which is the name passengers know
+const MARKETING_BRANDS = [
+  'American Eagle',
+  'Delta Connection',
+  'United Express',
+  'Alaska Horizon',
+  'Air Canada Express',
+]
+
 const SKY_PHRASES = {
   high: 'high in the sky',
   medium: 'halfway up the sky',
@@ -32,22 +41,63 @@ function capitalize(text: string): string {
   return text[0].toUpperCase() + text.slice(1)
 }
 
-export function flightTitle(plane: Plane, route: Route | null): string {
-  const callsign = plane.callsign
-  if (callsign !== null && route !== null && route.airline !== null) {
-    const match = AIRLINE_CALLSIGN_PATTERN.exec(callsign)
-    if (match !== null) {
-      return `${shortAirlineName(route.airline)} ${match[1]}`
-    }
+function flightNumber(callsign: string | null): string | null {
+  if (callsign === null) {
+    return null
+  }
+  const match = AIRLINE_CALLSIGN_PATTERN.exec(callsign)
+  if (match === null) {
+    return null
+  }
+  return match[1]
+}
+
+// the brand on the ticket when the registered owner is one, like "American Eagle"
+function marketingBrand(operator: string, info: AircraftInfo | null): string | null {
+  if (info === null || info.owner === null) {
+    return null
   }
 
-  if (callsign !== null) {
-    return callsign
+  const owner = info.owner.toLowerCase()
+  const brand = MARKETING_BRANDS.find((name) => name.toLowerCase() === owner)
+  if (brand === undefined) {
+    return null
+  }
+  if (brand.toLowerCase() === operator.toLowerCase()) {
+    return null
+  }
+  return brand
+}
+
+export function flightTitle(plane: Plane, route: Route | null, info: AircraftInfo | null): string {
+  const number = flightNumber(plane.callsign)
+  if (number !== null && route !== null && route.airline !== null) {
+    const brand = marketingBrand(route.airline, info)
+    if (brand !== null) {
+      return `${brand} ${number}`
+    }
+    return `${shortAirlineName(route.airline)} ${number}`
+  }
+
+  if (plane.callsign !== null) {
+    return plane.callsign
   }
   if (plane.registration !== null) {
     return plane.registration
   }
   return plane.hex.toUpperCase()
+}
+
+// only shown when the big line is using a brand instead of the real airline
+export function operatedByLine(plane: Plane, route: Route | null, info: AircraftInfo | null): string | null {
+  const number = flightNumber(plane.callsign)
+  if (number === null || route === null || route.airline === null) {
+    return null
+  }
+  if (marketingBrand(route.airline, info) === null) {
+    return null
+  }
+  return `Operated by ${route.airline}`
 }
 
 // type names come in all caps, so soften the plain words

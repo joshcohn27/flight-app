@@ -25,7 +25,7 @@ function OtherPlanes({ planes }: OtherPlanesProps) {
           return (
             <li key={plane.hex} className="other">
               <div className="other-top">
-                <span className="other-name">{flightTitle(plane, route)}</span>
+                <span className="other-name">{flightTitle(plane, route, info)}</span>
                 <span className="other-altitude">{formatAltitude(skyPlane.altitudeFeet)}</span>
               </div>
               {route !== null && (
