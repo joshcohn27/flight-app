@@ -456,3 +456,12 @@ figure {
 .footer a {
   color: inherit;
 }
+
+/* looks like the rest of the footer text */
+.footer-button {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+}

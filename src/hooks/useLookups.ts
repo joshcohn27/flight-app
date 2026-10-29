@@ -1,11 +1,17 @@
 import { useEffect, useState } from 'react'
+import { readOwnerCode } from '../ownerCode'
 import type { AircraftInfo, Route } from '../types'
 
 const REQUEST_TIMEOUT_MS = 10000
 const RETRY_MS = 60000
 
+type LookupRequest = {
+  url: string
+  headers: Record<string, string>
+}
+
 export type Lookup<T> = {
-  buildUrl: (key: string) => string
+  buildRequest: (key: string) => LookupRequest
   // only real answers go in here, so they're kept for the whole session
   cache: Map<string, T | null>
   // keys being looked up now, or waiting out a failed lookup
@@ -16,27 +22,39 @@ type LookupResult<T> =
   | { answered: true; value: T | null }
   | { answered: false }
 
-function createLookup<T>(buildUrl: (key: string) => string): Lookup<T> {
+function createLookup<T>(buildRequest: (key: string) => LookupRequest): Lookup<T> {
   return {
-    buildUrl,
+    buildRequest,
     cache: new Map(),
     pending: new Set(),
   }
 }
 
+// with the owner code, ask for live flightaware routes. the live flag keeps those
+// in their own spot in vercel's cache, apart from the free routes everyone else gets
 export const routeLookup = createLookup<Route>((callsign) => {
   const params = new URLSearchParams({ callsign })
-  return `/api/route?${params}`
+  const headers: Record<string, string> = {}
+
+  const ownerCode = readOwnerCode()
+  if (ownerCode !== null) {
+    params.set('live', '1')
+    headers['x-owner-code'] = ownerCode
+  }
+
+  return { url: `/api/route?${params}`, headers }
 })
 
 export const aircraftLookup = createLookup<AircraftInfo>((hex) => {
   const params = new URLSearchParams({ hex })
-  return `/api/aircraft?${params}`
+  return { url: `/api/aircraft?${params}`, headers: {} }
 })
 
 async function runLookup<T>(lookup: Lookup<T>, key: string): Promise<LookupResult<T>> {
   try {
-    const response = await fetch(lookup.buildUrl(key), {
+    const request = lookup.buildRequest(key)
+    const response = await fetch(request.url, {
+      headers: request.headers,
       signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
     })
     if (response.status >= 500) {

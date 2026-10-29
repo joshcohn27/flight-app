@@ -11,7 +11,7 @@ Live at [flight.joshbcohn.com](https://flight.joshbcohn.com). On an iPhone, open
 - Only commercial airline flights are shown: an airline style callsign (like UAL1234) on an airliner type. Private planes, business jets, helicopters and military flights are left out.
 - Regional flights show the brand passengers know, like "American Eagle 5441", with an "Operated by PSA Airlines" line under it. Major airlines get their logo.
 - The plane closest to you in a straight line through the air (ground distance and altitude combined) is the main card, so low planes passing nearby win over cruisers far overhead. If it's 15 degrees or more above the horizon it's labeled "Overhead", otherwise "Nearest". The next 3 are listed below.
-- With a FlightAware key set, routes come from FlightAware's AeroAPI, which knows the real flight in the air today. Without one, or if FlightAware fails, the app falls back to adsbdb.
+- On a phone with the owner code, routes come from FlightAware's AeroAPI, which knows the real flight in the air today. Everyone else, or if FlightAware fails, gets adsbdb's free routes.
 - adsbdb's route data is stored per flight number and is often out of date, so one of its routes is only shown when the plane is actually between the two airports and, once it's away from them, heading toward the destination. Otherwise the route line is hidden and the airline and flight number still show.
 - Routes come from `/api/route` and aircraft details (exact model, owner, photo) from `/api/aircraft`. Each is looked up once per plane per session, and failed lookups are retried after a minute.
 - The background follows the local weather from `/api/weather`: blue sky when it's clear, clouds, rain, snow or fog when there's weather, and stars at night.
@@ -28,11 +28,16 @@ npm run dev
 
 Then open http://localhost:5173. In dev, Vite answers the `/api` routes itself using the same handlers Vercel runs in production, so no Vercel CLI is needed. `vercel dev` works too if you want to match production exactly.
 
-### FlightAware key (for accurate routes)
+### FlightAware (accurate routes, only on your phone)
+
+FlightAware lookups cost money, so they only run for a device that has the owner code. Anyone else opening the site gets the free routes and never touches FlightAware.
 
 1. Make an AeroAPI account at https://www.flightaware.com/aeroapi/portal on the Personal tier and create an API key.
-2. For local dev, copy `.env.example` to `.env.local` and put the key in it. `.env.local` is ignored by git.
-3. On Vercel, add `FLIGHTAWARE_API_KEY` under Project Settings, Environment Variables, then redeploy.
+2. Pick an owner code, any long random string.
+3. On Vercel, add `FLIGHTAWARE_API_KEY` and `OWNER_CODE` under Project Settings, Environment Variables, then redeploy.
+4. On your phone, open the app, tap the copyright line at the bottom and enter the owner code. The footer then says "Live routes: FlightAware". Tap it again and leave it empty to turn it off.
+
+For local dev, copy `.env.example` to `.env.local` and fill in both values. `.env.local` is ignored by git.
 
 Each new callsign costs one lookup. Vercel caches each one for 30 minutes and the app never asks twice in a session.
 

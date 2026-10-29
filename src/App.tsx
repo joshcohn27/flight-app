@@ -12,6 +12,7 @@ import type { PlanesState } from './hooks/usePlanes'
 import { useWakeLock } from './hooks/useWakeLock'
 import { useWeather } from './hooks/useWeather'
 import { findOverhead } from './overhead'
+import { askForOwnerCode, readOwnerCode } from './ownerCode'
 import type { OverheadResult } from './overhead'
 import type { Coords } from './types'
 import { isLightSky } from './weather'
@@ -130,6 +131,8 @@ function App() {
     theme = 'theme-light'
   }
 
+  const hasOwnerCode = readOwnerCode() !== null
+
   let content = locationMessage(location)
   if (location.status === 'ready') {
     content = <PlanesView planesState={planesState} result={result} />
@@ -148,7 +151,12 @@ function App() {
           Airline names and logos are trademarks of their owners and are used only to identify
           flights. Flight Overhead is not affiliated with or endorsed by any airline.
         </p>
-        <p>© 2026 Josh Cohn</p>
+        {hasOwnerCode && <p>Live routes: FlightAware</p>}
+        <p>
+          <button type="button" className="footer-button" onClick={askForOwnerCode}>
+            © 2026 Josh Cohn
+          </button>
+        </p>
       </footer>
     </div>
   )

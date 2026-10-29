@@ -1,3 +1,4 @@
+import { timingSafeEqual } from 'node:crypto'
 import type { Airport, Route } from '../src/types'
 
 const TIMEOUT_MS = 4000
@@ -11,6 +12,9 @@ const ROUTE_CACHE = 'public, s-maxage=10800, stale-while-revalidate=86400'
 // flightaware gives today's real flight, but the same number flies another leg later,
 // so only hold those for half an hour
 const LIVE_ROUTE_CACHE = 'public, s-maxage=1800'
+
+// the owner asked for live but flightaware had nothing, try again in a few minutes
+const LIVE_FALLBACK_CACHE = 'public, s-maxage=300'
 
 const NO_CACHE = 'no-store'
 
@@ -177,6 +181,22 @@ async function fetchLiveLegs(callsign: string): Promise<Legs | null> {
   }
 }
 
+// flightaware costs money, so only the owner's phone gets to use it
+function isOwner(request: Request): boolean {
+  const ownerCode = process.env.OWNER_CODE
+  const sentCode = request.headers.get('x-owner-code')
+  if (!ownerCode || !sentCode) {
+    return false
+  }
+
+  const expected = Buffer.from(ownerCode)
+  const sent = Buffer.from(sentCode)
+  if (expected.length !== sent.length) {
+    return false
+  }
+  return timingSafeEqual(expected, sent)
+}
+
 // adsbdb's stored route, which also has the airline name
 async function fetchStoredRoute(callsign: string): Promise<StoredLookup> {
   let response: Response
@@ -215,6 +235,13 @@ async function fetchStoredRoute(callsign: string): Promise<StoredLookup> {
   return { answered: true, route }
 }
 
+function storedRouteResponse(stored: StoredLookup, cacheControl: string): Response {
+  if (!stored.answered) {
+    return json({ error: 'route data is unavailable' }, 502, NO_CACHE)
+  }
+  return json(stored.route, 200, cacheControl)
+}
+
 export async function GET(request: Request): Promise<Response> {
   const params = new URL(request.url).searchParams
   const callsign = (params.get('callsign') ?? '').trim().toUpperCase()
@@ -222,23 +249,30 @@ export async function GET(request: Request): Promise<Response> {
     return json({ error: 'a valid callsign is required' }, 400, NO_CACHE)
   }
 
+  const wantsLive = params.get('live') === '1'
+  if (!wantsLive) {
+    return storedRouteResponse(await fetchStoredRoute(callsign), ROUTE_CACHE)
+  }
+
+  // someone asked for live without the code. answer for free and don't cache it,
+  // so it can't take the owner's spot in the live cache
+  if (!isOwner(request)) {
+    return storedRouteResponse(await fetchStoredRoute(callsign), NO_CACHE)
+  }
+
   const [stored, live] = await Promise.all([fetchStoredRoute(callsign), fetchLiveLegs(callsign)])
-
-  if (live !== null) {
-    let airline = null
-    if (stored.answered && stored.route !== null) {
-      airline = stored.route.airline
-    }
-    const route: Route = {
-      airline,
-      origin: live.origin,
-      destination: live.destination,
-    }
-    return json(route, 200, LIVE_ROUTE_CACHE)
+  if (live === null) {
+    return storedRouteResponse(stored, LIVE_FALLBACK_CACHE)
   }
 
-  if (!stored.answered) {
-    return json({ error: 'route data is unavailable' }, 502, NO_CACHE)
+  let airline = null
+  if (stored.answered && stored.route !== null) {
+    airline = stored.route.airline
   }
-  return json(stored.route, 200, ROUTE_CACHE)
+  const route: Route = {
+    airline,
+    origin: live.origin,
+    destination: live.destination,
+  }
+  return json(route, 200, LIVE_ROUTE_CACHE)
 }
