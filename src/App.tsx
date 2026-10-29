@@ -78,8 +78,8 @@ function PlanesView({ planesState, result }: PlanesViewProps) {
     return (
       <>
         <StatusMessage
-          title="No planes nearby"
-          detail="Nothing is flying within about 15 miles right now."
+          title="No airline flights nearby"
+          detail="No commercial flights within about 15 miles right now."
         />
         {staleNote}
       </>

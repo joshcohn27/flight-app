@@ -1,5 +1,5 @@
-import { AIRCRAFT_TYPES } from './aircraftTypes'
-import { compassWord, skyHeight } from './overhead'
+import { AIRLINER_TYPES } from './aircraftTypes'
+import { AIRLINE_CALLSIGN_PATTERN, compassWord, skyHeight } from './overhead'
 import type { SkyPlane } from './overhead'
 import type { AircraftInfo, Airport, Plane, Route } from './types'
 
@@ -8,9 +8,6 @@ const MPH_PER_KNOT = 1.15078
 
 // anything slower than this is basically level flight
 const LEVEL_FLIGHT_FPM = 250
-
-// icao airline prefix followed by the flight number, like UAL1234
-const AIRLINE_CALLSIGN_PATTERN = /^[A-Z]{3}(\d[A-Z0-9]*)$/
 
 // regional flights are sold under these brands, which is the name passengers know
 const MARKETING_BRANDS = [
@@ -137,7 +134,7 @@ function modelText(info: AircraftInfo | null): string | null {
 export function aircraftLabel(plane: Plane, info: AircraftInfo | null): string | null {
   const code = typeCode(plane, info)
   if (code !== null) {
-    const knownName = AIRCRAFT_TYPES[code]
+    const knownName = AIRLINER_TYPES[code]
     if (knownName !== undefined) {
       return knownName
     }

@@ -1,4 +1,8 @@
+import { AIRLINER_TYPES } from './aircraftTypes'
 import type { Coords, Plane } from './types'
+
+// icao airline prefix followed by the flight number, like UAL1234
+export const AIRLINE_CALLSIGN_PATTERN = /^[A-Z]{3}(\d[A-Z0-9]*)$/
 
 const EARTH_RADIUS_METERS = 6371000
 const METERS_PER_FOOT = 0.3048
@@ -94,6 +98,22 @@ export function skyHeight(elevationDegrees: number): SkyHeight {
   return 'low'
 }
 
+// airline style callsign on an airliner. private planes fly under their tail number,
+// and charter jets or military flights that do use airline style callsigns aren't airliners
+export function isCommercial(plane: Plane): boolean {
+  if (plane.callsign === null) {
+    return false
+  }
+  if (!AIRLINE_CALLSIGN_PATTERN.test(plane.callsign)) {
+    return false
+  }
+  // some feeds leave the type out, the callsign alone is a good enough sign then
+  if (plane.typeCode === null) {
+    return true
+  }
+  return plane.typeCode in AIRLINER_TYPES
+}
+
 // null if the plane is on the ground or has no position
 function toSkyPlane(plane: Plane, me: Coords): SkyPlane | null {
   if (typeof plane.altitude !== 'number') {
@@ -122,6 +142,9 @@ function toSkyPlane(plane: Plane, me: Coords): SkyPlane | null {
 export function findOverhead(planes: Plane[], me: Coords): OverheadResult | null {
   const skyPlanes: SkyPlane[] = []
   for (const plane of planes) {
+    if (!isCommercial(plane)) {
+      continue
+    }
     const skyPlane = toSkyPlane(plane, me)
     if (skyPlane !== null) {
       skyPlanes.push(skyPlane)
