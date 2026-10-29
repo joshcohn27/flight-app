@@ -22,6 +22,7 @@ export type SkyPlane = {
   plane: Plane
   altitudeFeet: number
   distanceMeters: number
+  slantDistanceMeters: number
   elevationDegrees: number
   bearingDegrees: number
   direction: string
@@ -54,6 +55,11 @@ export function groundDistanceMeters(from: Coords, to: Coords): number {
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
 
   return EARTH_RADIUS_METERS * c
+}
+
+// straight line from me to the plane, through the air
+export function slantDistanceMeters(altitudeMeters: number, distanceMeters: number): number {
+  return Math.hypot(altitudeMeters, distanceMeters)
 }
 
 export function elevationAngleDegrees(altitudeMeters: number, distanceMeters: number): number {
@@ -106,6 +112,7 @@ function toSkyPlane(plane: Plane, me: Coords): SkyPlane | null {
     plane,
     altitudeFeet: plane.altitude,
     distanceMeters,
+    slantDistanceMeters: slantDistanceMeters(altitudeMeters, distanceMeters),
     elevationDegrees: elevationAngleDegrees(altitudeMeters, distanceMeters),
     bearingDegrees: bearing,
     direction: compassWord(bearing),
@@ -125,8 +132,8 @@ export function findOverhead(planes: Plane[], me: Coords): OverheadResult | null
     return null
   }
 
-  // highest in the sky first
-  skyPlanes.sort((a, b) => b.elevationDegrees - a.elevationDegrees)
+  // closest through the air first, so low planes passing nearby beat cruisers way up high
+  skyPlanes.sort((a, b) => a.slantDistanceMeters - b.slantDistanceMeters)
 
   const main = skyPlanes[0]
   const others = skyPlanes.slice(1, 1 + OTHER_PLANES_COUNT)

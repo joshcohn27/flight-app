@@ -8,7 +8,7 @@ Live at [flight.joshbcohn.com](https://flight.joshbcohn.com). On an iPhone, open
 
 - Your location comes from the browser and updates as you move.
 - Every 5 seconds the app asks `/api/nearby` for planes within 15 nautical miles (it pauses when the app is in the background).
-- The plane highest in the sky (by elevation angle) is the main card. If it's 15 degrees or more above the horizon it's labeled "Overhead", otherwise "Nearest". The next 3 are listed below.
+- The plane closest to you in a straight line through the air (ground distance and altitude combined) is the main card, so low planes passing nearby win over cruisers far overhead. If it's 15 degrees or more above the horizon it's labeled "Overhead", otherwise "Nearest". The next 3 are listed below.
 - Routes come from `/api/route` and are looked up once per callsign per session.
 - The screen is kept awake with the Wake Lock API where it's supported.
 
