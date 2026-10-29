@@ -1,4 +1,4 @@
-import type { Route } from '../types'
+import type { Airport, Route } from '../types'
 
 type RouteTextProps = {
   route: Route
@@ -20,12 +20,20 @@ function Arrow() {
   )
 }
 
+// "Philadelphia (PHL)", or just the city when there's no code
+function airportLabel(airport: Airport): string {
+  if (airport.iata === null) {
+    return airport.city
+  }
+  return `${airport.city} (${airport.iata})`
+}
+
 function RouteText({ route }: RouteTextProps) {
   return (
     <>
-      {route.origin.city}
+      {airportLabel(route.origin)}
       <Arrow />
-      {route.destination.city}
+      {airportLabel(route.destination)}
     </>
   )
 }
