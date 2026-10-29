@@ -1,6 +1,7 @@
-import { flightTitle, formatAltitude, routeLine } from '../format'
-import { getRoute } from '../hooks/useRoutes'
+import { aircraftLabel, flightTitle, formatAltitude } from '../format'
+import { aircraftLookup, readLookup, routeLookup } from '../hooks/useLookups'
 import type { SkyPlane } from '../overhead'
+import RouteText from './RouteText'
 
 type OtherPlanesProps = {
   planes: SkyPlane[]
@@ -12,24 +13,32 @@ function OtherPlanes({ planes }: OtherPlanesProps) {
   }
 
   return (
-    <ul className="others">
-      {planes.map((skyPlane) => {
-        const route = getRoute(skyPlane.plane.callsign)
-        const routeText = routeLine(route)
+    <section className="others-section">
+      <h2 className="others-heading">Also nearby</h2>
+      <ul className="others">
+        {planes.map((skyPlane) => {
+          const plane = skyPlane.plane
+          const route = readLookup(routeLookup, plane.callsign)
+          const info = readLookup(aircraftLookup, plane.hex)
+          const aircraft = aircraftLabel(plane, info)
 
-        let name = flightTitle(skyPlane.plane, route)
-        if (routeText !== null) {
-          name = `${name} · ${routeText}`
-        }
-
-        return (
-          <li key={skyPlane.plane.hex} className="other">
-            <span className="other-name">{name}</span>
-            <span className="other-altitude">{formatAltitude(skyPlane.altitudeFeet)}</span>
-          </li>
-        )
-      })}
-    </ul>
+          return (
+            <li key={plane.hex} className="other">
+              <div className="other-top">
+                <span className="other-name">{flightTitle(plane, route)}</span>
+                <span className="other-altitude">{formatAltitude(skyPlane.altitudeFeet)}</span>
+              </div>
+              {route !== null && (
+                <div className="other-line">
+                  <RouteText route={route} />
+                </div>
+              )}
+              {aircraft !== null && <div className="other-line">{aircraft}</div>}
+            </li>
+          )
+        })}
+      </ul>
+    </section>
   )
 }
 

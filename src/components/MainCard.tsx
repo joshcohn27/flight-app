@@ -1,6 +1,7 @@
-import { aircraftLabel, flightTitle, formatAltitude, formatMiles, lookPhrase, routeLine } from '../format'
-import { getRoute } from '../hooks/useRoutes'
+import { aircraftLabel, flightTitle, formatAltitude, formatMiles, lookPhrase } from '../format'
+import { aircraftLookup, readLookup, routeLookup } from '../hooks/useLookups'
 import type { OverheadResult } from '../overhead'
+import RouteText from './RouteText'
 
 type MainCardProps = {
   result: OverheadResult
@@ -8,23 +9,26 @@ type MainCardProps = {
 
 function MainCard({ result }: MainCardProps) {
   const { main, label } = result
-  const route = getRoute(main.plane.callsign)
-  const routeText = routeLine(route)
+  const route = readLookup(routeLookup, main.plane.callsign)
+  const info = readLookup(aircraftLookup, main.plane.hex)
+  const aircraft = aircraftLabel(main.plane, info)
 
-  const details: string[] = []
-  const aircraft = aircraftLabel(main.plane)
-  if (aircraft !== null) {
-    details.push(aircraft)
-  }
-  details.push(formatAltitude(main.altitudeFeet))
-  details.push(formatMiles(main.distanceMeters))
+  const altitude = formatAltitude(main.altitudeFeet)
+  const distance = formatMiles(main.distanceMeters)
 
   return (
     <section className="main-card">
       <p className="label">{label}</p>
       <h1 className="title">{flightTitle(main.plane, route)}</h1>
-      {routeText !== null && <p className="route">{routeText}</p>}
-      <p className="details">{details.join(' · ')}</p>
+      {route !== null && (
+        <p className="route">
+          <RouteText route={route} />
+        </p>
+      )}
+      {aircraft !== null && <p className="aircraft">{aircraft}</p>}
+      <p className="details">
+        {altitude} up, {distance} away
+      </p>
       <p className="look">{lookPhrase(main)}</p>
     </section>
   )
