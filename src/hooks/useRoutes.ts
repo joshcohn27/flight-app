@@ -1,20 +1,37 @@
 import { useEffect, useState } from 'react'
 import type { Route } from '../types'
 
-// lives for the whole session so each callsign is only looked up once
+const REQUEST_TIMEOUT_MS = 10000
+const RETRY_MS = 60000
+
+// only real answers go in here, so they're kept for the whole session
 const routeCache = new Map<string, Route | null>()
+
+// callsigns being looked up now, or waiting out a failed lookup
 const pending = new Set<string>()
 
-async function fetchRoute(callsign: string): Promise<Route | null> {
+type RouteLookup =
+  | { answered: true; route: Route | null }
+  | { answered: false }
+
+async function lookupRoute(callsign: string): Promise<RouteLookup> {
   try {
     const params = new URLSearchParams({ callsign })
-    const response = await fetch(`/api/route?${params}`)
-    if (!response.ok) {
-      return null
+    const response = await fetch(`/api/route?${params}`, {
+      signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+    })
+    if (response.status >= 500) {
+      return { answered: false }
     }
-    return await response.json()
+    // a 4xx means this callsign will never have a route
+    if (!response.ok) {
+      return { answered: true, route: null }
+    }
+    const route: Route | null = await response.json()
+    return { answered: true, route }
   } catch {
-    return null
+    // network error or timeout
+    return { answered: false }
   }
 }
 
@@ -26,7 +43,8 @@ export function getRoute(callsign: string | null): Route | null {
 }
 
 export function useRoutes(callsigns: (string | null)[]): void {
-  const [, setLoadedCount] = useState(0)
+  // bumped when a route loads or a retry is due, so the screen and effect catch up
+  const [refreshCount, setRefreshCount] = useState(0)
 
   // a plain string key so the effect only runs when the callsigns change
   const key = callsigns.filter((callsign) => callsign !== null).join(',')
@@ -41,11 +59,19 @@ export function useRoutes(callsigns: (string | null)[]): void {
         continue
       }
       pending.add(callsign)
-      fetchRoute(callsign).then((route) => {
-        routeCache.set(callsign, route)
-        pending.delete(callsign)
-        setLoadedCount((count) => count + 1)
+      lookupRoute(callsign).then((lookup) => {
+        if (lookup.answered) {
+          routeCache.set(callsign, lookup.route)
+          pending.delete(callsign)
+          setRefreshCount((count) => count + 1)
+          return
+        }
+        // hold off for a minute, then let the effect try it again
+        window.setTimeout(() => {
+          pending.delete(callsign)
+          setRefreshCount((count) => count + 1)
+        }, RETRY_MS)
       })
     }
-  }, [key])
+  }, [key, refreshCount])
 }
