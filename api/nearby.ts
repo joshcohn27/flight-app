@@ -14,6 +14,10 @@ type RawAircraft = {
   lon?: unknown
   gs?: unknown
   track?: unknown
+  baro_rate?: unknown
+  geom_rate?: unknown
+  squawk?: unknown
+  emergency?: unknown
 }
 
 type AircraftResponse = {
@@ -48,6 +52,15 @@ function readAltitude(value: unknown): number | 'ground' | null {
   return readNumber(value)
 }
 
+// "none" is what they send when nothing is wrong
+function readEmergency(value: unknown): string | null {
+  const text = readText(value)
+  if (text === 'none') {
+    return null
+  }
+  return text
+}
+
 function toPlane(raw: RawAircraft): Plane {
   return {
     hex: readText(raw.hex) ?? '',
@@ -60,6 +73,9 @@ function toPlane(raw: RawAircraft): Plane {
     lon: readNumber(raw.lon),
     groundSpeed: readNumber(raw.gs),
     track: readNumber(raw.track),
+    verticalRate: readNumber(raw.baro_rate) ?? readNumber(raw.geom_rate),
+    squawk: readText(raw.squawk),
+    emergency: readEmergency(raw.emergency),
   }
 }
 

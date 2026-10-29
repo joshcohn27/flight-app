@@ -44,6 +44,7 @@ function toAirport(raw: RawAirport | undefined): Airport | null {
   }
   return {
     city,
+    name: readText(raw.name),
     iata: readText(raw.iata_code),
   }
 }

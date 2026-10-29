@@ -14,10 +14,14 @@ export type Plane = {
   lon: number | null
   groundSpeed: number | null
   track: number | null
+  verticalRate: number | null
+  squawk: string | null
+  emergency: string | null
 }
 
 export type Airport = {
   city: string
+  name: string | null
   iata: string | null
 }
 
@@ -25,4 +29,19 @@ export type Route = {
   airline: string | null
   origin: Airport
   destination: Airport
+}
+
+export type AircraftInfo = {
+  manufacturer: string | null
+  model: string | null
+  icaoType: string | null
+  registration: string | null
+  owner: string | null
+  country: string | null
+  photoUrl: string | null
+}
+
+export type Weather = {
+  code: number
+  isDay: boolean
 }
