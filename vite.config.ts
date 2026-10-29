@@ -1,5 +1,5 @@
 import react from '@vitejs/plugin-react'
-import { defineConfig } from 'vite'
+import { defineConfig, loadEnv } from 'vite'
 import type { Plugin } from 'vite'
 
 const API_PATH_PATTERN = /^\/api\/([a-z]+)$/
@@ -36,6 +36,15 @@ function apiRoutes(): Plugin {
 }
 
 // https://vite.dev/config/
-export default defineConfig({
-  plugins: [react(), apiRoutes()],
+export default defineConfig(({ mode }) => {
+  // the api handlers read secrets from process.env like they do on vercel,
+  // so pass along the key from .env.local in dev
+  const env = loadEnv(mode, process.cwd(), '')
+  if (env.FLIGHTAWARE_API_KEY && !process.env.FLIGHTAWARE_API_KEY) {
+    process.env.FLIGHTAWARE_API_KEY = env.FLIGHTAWARE_API_KEY
+  }
+
+  return {
+    plugins: [react(), apiRoutes()],
+  }
 })
