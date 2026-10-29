@@ -14,15 +14,14 @@ Live at [flight.joshbcohn.com](https://flight.joshbcohn.com). On an iPhone, open
 
 ## Running locally
 
-You need Node 20+ and the Vercel CLI, since the `/api` functions only run under Vercel.
+You need Node 20+.
 
 ```sh
 npm install
-npm i -g vercel
-vercel dev
+npm run dev
 ```
 
-Then open http://localhost:3000. Plain `npm run dev` serves the frontend only, so the API calls will fail.
+Then open http://localhost:5173. In dev, Vite answers the `/api` routes itself using the same handlers Vercel runs in production, so no Vercel CLI is needed. `vercel dev` works too if you want to match production exactly.
 
 Other scripts:
 
