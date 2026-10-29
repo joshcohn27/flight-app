@@ -11,6 +11,8 @@ type RawAirport = {
   name?: unknown
   municipality?: unknown
   iata_code?: unknown
+  latitude?: unknown
+  longitude?: unknown
 }
 
 type RouteResponse = {
@@ -34,6 +36,16 @@ function readText(value: unknown): string | null {
   return trimmed
 }
 
+function readNumber(value: unknown): number | null {
+  if (typeof value !== 'number') {
+    return null
+  }
+  if (!Number.isFinite(value)) {
+    return null
+  }
+  return value
+}
+
 function toAirport(raw: RawAirport | undefined): Airport | null {
   if (!raw) {
     return null
@@ -46,6 +58,8 @@ function toAirport(raw: RawAirport | undefined): Airport | null {
     city,
     name: readText(raw.name),
     iata: readText(raw.iata_code),
+    lat: readNumber(raw.latitude),
+    lon: readNumber(raw.longitude),
   }
 }
 

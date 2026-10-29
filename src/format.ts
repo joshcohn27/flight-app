@@ -1,6 +1,6 @@
 import { AIRLINER_TYPES } from './aircraftTypes'
 import { MAJOR_AIRLINES, MARKETING_BRANDS, SINGLE_BRAND_REGIONALS } from './airlines'
-import { AIRLINE_CALLSIGN_PATTERN, compassWord, skyHeight } from './overhead'
+import { AIRLINE_CALLSIGN_PATTERN, compassWord, isRoutePlausible, skyHeight } from './overhead'
 import type { SkyPlane } from './overhead'
 import type { AircraftInfo, Airport, Plane, Route } from './types'
 
@@ -115,6 +115,18 @@ export function airlineLogoCode(plane: Plane, route: Route | null, info: Aircraf
 
   const prefix = plane.callsign.slice(0, 3)
   return MAJOR_AIRLINES[prefix] ?? null
+}
+
+// the route to show for where a flight is going, or null when it doesn't fit where the plane is.
+// the airline name still comes from the route either way, since that part is reliable
+export function shownRoute(plane: Plane, route: Route | null): Route | null {
+  if (route === null) {
+    return null
+  }
+  if (!isRoutePlausible(plane, route)) {
+    return null
+  }
+  return route
 }
 
 // type names come in all caps, so soften the plain words
@@ -255,9 +267,10 @@ export function planeFacts(plane: Plane, route: Route | null, info: AircraftInfo
     add('Owner', info.owner)
     add('Registered in', info.country)
   }
-  if (route !== null) {
-    add('From', airportText(route.origin))
-    add('To', airportText(route.destination))
+  const legs = shownRoute(plane, route)
+  if (legs !== null) {
+    add('From', airportText(legs.origin))
+    add('To', airportText(legs.destination))
   }
   add('Speed', speedText(plane.groundSpeed))
   add('Heading', headingText(plane.track))

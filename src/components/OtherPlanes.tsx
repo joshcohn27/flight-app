@@ -1,4 +1,4 @@
-import { aircraftLabel, airlineLogoCode, flightTitle, formatAltitude } from '../format'
+import { aircraftLabel, airlineLogoCode, flightTitle, formatAltitude, shownRoute } from '../format'
 import { aircraftLookup, readLookup, routeLookup } from '../hooks/useLookups'
 import type { SkyPlane } from '../overhead'
 import AirlineLogo from './AirlineLogo'
@@ -23,6 +23,7 @@ function OtherPlanes({ planes }: OtherPlanesProps) {
           const info = readLookup(aircraftLookup, plane.hex)
           const aircraft = aircraftLabel(plane, info)
           const logoCode = airlineLogoCode(plane, route, info)
+          const legs = shownRoute(plane, route)
 
           return (
             <li key={plane.hex} className="other">
@@ -31,9 +32,9 @@ function OtherPlanes({ planes }: OtherPlanesProps) {
                 <span className="other-name">{flightTitle(plane, route, info)}</span>
                 <span className="other-altitude">{formatAltitude(skyPlane.altitudeFeet)}</span>
               </div>
-              {route !== null && (
+              {legs !== null && (
                 <div className="other-line">
-                  <RouteText route={route} />
+                  <RouteText route={legs} />
                 </div>
               )}
               {aircraft !== null && <div className="other-line">{aircraft}</div>}

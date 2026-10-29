@@ -1,5 +1,5 @@
 import { AIRLINER_TYPES } from './aircraftTypes'
-import type { Coords, Plane } from './types'
+import type { Airport, Coords, Plane, Route } from './types'
 
 // icao airline prefix followed by the flight number, like UAL1234
 export const AIRLINE_CALLSIGN_PATTERN = /^[A-Z]{3}(\d[A-Z0-9]*)$/
@@ -8,6 +8,14 @@ const EARTH_RADIUS_METERS = 6371000
 const METERS_PER_FOOT = 0.3048
 const OVERHEAD_MIN_ANGLE = 15
 const OTHER_PLANES_COUNT = 3
+
+// how far off the straight line between two airports a plane can be and still be on that route
+const ROUTE_DETOUR_FACTOR = 1.1
+const ROUTE_SLACK_METERS = 80000
+
+// near an airport planes turn every which way, so only check heading when far from both
+const HEADING_CHECK_MIN_METERS = 60000
+const MAX_HEADING_OFF_DEGREES = 90
 
 const COMPASS_WORDS = [
   'north',
@@ -112,6 +120,51 @@ export function isCommercial(plane: Plane): boolean {
     return true
   }
   return plane.typeCode in AIRLINER_TYPES
+}
+
+function airportCoords(airport: Airport): Coords | null {
+  if (airport.lat === null || airport.lon === null) {
+    return null
+  }
+  return { lat: airport.lat, lon: airport.lon }
+}
+
+// smallest gap between two compass headings, 0 to 180
+function headingDifference(a: number, b: number): number {
+  const difference = Math.abs(a - b) % 360
+  if (difference > 180) {
+    return 360 - difference
+  }
+  return difference
+}
+
+// route data is stored per flight number and is sometimes out of date, so make sure
+// the plane is actually somewhere between the two airports and flying the right way
+export function isRoutePlausible(plane: Plane, route: Route): boolean {
+  const origin = airportCoords(route.origin)
+  const destination = airportCoords(route.destination)
+  if (plane.lat === null || plane.lon === null || origin === null || destination === null) {
+    // nothing to check against
+    return true
+  }
+
+  const here = { lat: plane.lat, lon: plane.lon }
+  const fromOrigin = groundDistanceMeters(origin, here)
+  const toDestination = groundDistanceMeters(here, destination)
+  const direct = groundDistanceMeters(origin, destination)
+
+  const maxDistance = direct * ROUTE_DETOUR_FACTOR + ROUTE_SLACK_METERS
+  if (fromOrigin + toDestination > maxDistance) {
+    return false
+  }
+
+  const nearAnAirport = fromOrigin < HEADING_CHECK_MIN_METERS || toDestination < HEADING_CHECK_MIN_METERS
+  if (nearAnAirport || plane.track === null) {
+    return true
+  }
+
+  const headingToDestination = bearingDegrees(here, destination)
+  return headingDifference(plane.track, headingToDestination) <= MAX_HEADING_OFF_DEGREES
 }
 
 // null if the plane is on the ground or has no position

@@ -23,6 +23,8 @@ export type Airport = {
   city: string
   name: string | null
   iata: string | null
+  lat: number | null
+  lon: number | null
 }
 
 export type Route = {

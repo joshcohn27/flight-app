@@ -6,6 +6,7 @@ import {
   formatMiles,
   lookPhrase,
   operatedByLine,
+  shownRoute,
 } from '../format'
 import { aircraftLookup, readLookup, routeLookup } from '../hooks/useLookups'
 import type { OverheadResult } from '../overhead'
@@ -23,6 +24,7 @@ function MainCard({ result }: MainCardProps) {
   const aircraft = aircraftLabel(main.plane, info)
   const operatedBy = operatedByLine(main.plane, route, info)
   const logoCode = airlineLogoCode(main.plane, route, info)
+  const legs = shownRoute(main.plane, route)
 
   const altitude = formatAltitude(main.altitudeFeet)
   const distance = formatMiles(main.distanceMeters)
@@ -35,9 +37,9 @@ function MainCard({ result }: MainCardProps) {
       </div>
       <h1 className="title">{flightTitle(main.plane, route, info)}</h1>
       {operatedBy !== null && <p className="operated-by">{operatedBy}</p>}
-      {route !== null && (
+      {legs !== null && (
         <p className="route">
-          <RouteText route={route} />
+          <RouteText route={legs} />
         </p>
       )}
       {aircraft !== null && <p className="aircraft">{aircraft}</p>}
