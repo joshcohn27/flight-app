@@ -8,6 +8,8 @@ Live at [flight.joshbcohn.com](https://flight.joshbcohn.com). On an iPhone, open
 
 - Your location comes from the browser and updates as you move.
 - Every 5 seconds the app asks `/api/nearby` for planes within 15 nautical miles (it pauses when the app is in the background).
+- Only commercial airline flights are shown: an airline style callsign (like UAL1234) on an airliner type. Private planes, business jets, helicopters and military flights are left out.
+- Regional flights show the brand passengers know, like "American Eagle 5441", with an "Operated by PSA Airlines" line under it. Major airlines get their logo.
 - The plane closest to you in a straight line through the air (ground distance and altitude combined) is the main card, so low planes passing nearby win over cruisers far overhead. If it's 15 degrees or more above the horizon it's labeled "Overhead", otherwise "Nearest". The next 3 are listed below.
 - Routes come from `/api/route` and aircraft details (exact model, owner, photo) from `/api/aircraft`. Each is looked up once per plane per session, and failed lookups are retried after a minute.
 - The background follows the local weather from `/api/weather`: blue sky when it's clear, clouds, rain, snow or fog when there's weather, and stars at night.
@@ -37,7 +39,8 @@ Other scripts:
 - `api/weather.ts`: current weather and day or night, from Open-Meteo, cached for ten minutes
 - `src/overhead.ts`: distance, elevation angle, compass direction, and picking the main plane
 - `src/format.ts`: turns plane data into the text on screen
-- `src/aircraftTypes.ts`: friendly names for common aircraft type codes
+- `src/aircraftTypes.ts`: airliner type codes and their friendly names, which also decide what counts as commercial
+- `src/airlines.ts`: major airline logo codes and regional brands
 - `src/weather.ts`: maps weather codes to the background sky
 - `src/hooks/`: location, polling, route lookups, and wake lock
 
@@ -48,5 +51,10 @@ Other scripts:
 - [adsbdb](https://www.adsbdb.com): flight routes, airlines and aircraft details
 - [Open-Meteo](https://open-meteo.com): current weather
 - [airport-data.com](https://www.airport-data.com): aircraft photos, linked through adsbdb
+- [avs.io](https://pics.avs.io): airline logos
 
 All of them are free and need no API key. Attribution is shown in the app.
+
+Airline names and logos are trademarks of their owners and are used only to identify flights. This project is not affiliated with or endorsed by any airline.
+
+© 2026 Josh Cohn
