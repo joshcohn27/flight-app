@@ -20,8 +20,10 @@ type RawAircraft = {
   emergency?: unknown
 }
 
+// adsb.lol calls the list "ac", adsb.fi calls it "aircraft"
 type AircraftResponse = {
   ac?: unknown
+  aircraft?: unknown
 }
 
 function readText(value: unknown): string | null {
@@ -99,10 +101,11 @@ async function fetchAircraft(url: string): Promise<RawAircraft[]> {
     throw new Error(`upstream returned ${response.status}`)
   }
   const data = (await response.json()) as AircraftResponse | null
-  if (!Array.isArray(data?.ac)) {
+  const list = data?.ac ?? data?.aircraft
+  if (!Array.isArray(list)) {
     throw new Error('upstream sent no aircraft list')
   }
-  return data.ac as RawAircraft[]
+  return list as RawAircraft[]
 }
 
 // tries each source in order and returns the first one that works
@@ -139,7 +142,7 @@ export async function GET(request: Request): Promise<Response> {
   const lonText = lon.toFixed(4)
   const urls = [
     `https://api.adsb.lol/v2/lat/${latText}/lon/${lonText}/dist/${RADIUS_NM}`,
-    `https://api.airplanes.live/v2/point/${latText}/${lonText}/${RADIUS_NM}`,
+    `https://opendata.adsb.fi/api/v2/lat/${latText}/lon/${lonText}/dist/${RADIUS_NM}`,
   ]
 
   const aircraft = await fetchFromAnySource(urls)

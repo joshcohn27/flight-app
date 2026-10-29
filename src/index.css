@@ -407,3 +407,7 @@ figure {
     animation: none;
   }
 }
+
+.footer a {
+  color: inherit;
+}

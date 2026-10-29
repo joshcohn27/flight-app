@@ -31,7 +31,7 @@ Other scripts:
 
 ## Project layout
 
-- `api/nearby.ts`: live planes near a point, from adsb.lol with airplanes.live as a fallback
+- `api/nearby.ts`: live planes near a point, from adsb.lol with adsb.fi as a fallback
 - `api/route.ts`: airline and origin/destination for a callsign, from adsbdb, cached by Vercel for a few hours
 - `api/aircraft.ts`: model, owner and photo for an airframe, from adsbdb, cached for a day
 - `api/weather.ts`: current weather and day or night, from Open-Meteo, cached for ten minutes
@@ -44,7 +44,7 @@ Other scripts:
 ## Data sources
 
 - [adsb.lol](https://adsb.lol): live aircraft positions
-- [airplanes.live](https://airplanes.live): live aircraft positions (fallback)
+- [adsb.fi](https://adsb.fi): live aircraft positions (fallback)
 - [adsbdb](https://www.adsbdb.com): flight routes, airlines and aircraft details
 - [Open-Meteo](https://open-meteo.com): current weather
 - [airport-data.com](https://www.airport-data.com): aircraft photos, linked through adsbdb

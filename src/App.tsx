@@ -140,7 +140,7 @@ function App() {
       <SkyBackground weather={weather} />
       <main className="screen">{content}</main>
       <footer className="footer">
-        Data: adsb.lol, airplanes.live, adsbdb, Open-Meteo
+        Data: adsb.lol, <a href="https://adsb.fi">adsb.fi</a>, adsbdb, Open-Meteo
       </footer>
     </div>
   )
