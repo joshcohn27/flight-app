@@ -8,6 +8,17 @@ export const MARKETING_BRANDS: Record<string, string> = {
   'Air Canada Express': 'AC',
 }
 
+// these regionals only ever fly for one brand, so the callsign is enough when the
+// owner record is missing. republic and skywest fly for several, so they aren't here
+export const SINGLE_BRAND_REGIONALS: Record<string, string> = {
+  JIA: 'American Eagle',
+  PDT: 'American Eagle',
+  ENY: 'American Eagle',
+  EDV: 'Delta Connection',
+  ASH: 'United Express',
+  GJS: 'United Express',
+}
+
 // major airlines by icao callsign prefix, pointing at the iata code their logo is filed under
 export const MAJOR_AIRLINES: Record<string, string> = {
   // united states

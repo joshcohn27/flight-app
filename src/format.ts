@@ -1,5 +1,5 @@
 import { AIRLINER_TYPES } from './aircraftTypes'
-import { MAJOR_AIRLINES, MARKETING_BRANDS } from './airlines'
+import { MAJOR_AIRLINES, MARKETING_BRANDS, SINGLE_BRAND_REGIONALS } from './airlines'
 import { AIRLINE_CALLSIGN_PATTERN, compassWord, skyHeight } from './overhead'
 import type { SkyPlane } from './overhead'
 import type { AircraftInfo, Airport, Plane, Route } from './types'
@@ -41,15 +41,26 @@ function flightNumber(callsign: string | null): string | null {
   return match[1]
 }
 
-// the brand on the ticket when the registered owner is one, like "American Eagle"
-function marketingBrand(operator: string, info: AircraftInfo | null): string | null {
+// the owner record, when it's a brand like "American Eagle"
+function ownerBrand(info: AircraftInfo | null): string | null {
   if (info === null || info.owner === null) {
     return null
   }
-
   const owner = info.owner.toLowerCase()
   const brand = Object.keys(MARKETING_BRANDS).find((name) => name.toLowerCase() === owner)
   if (brand === undefined) {
+    return null
+  }
+  return brand
+}
+
+// the brand on the ticket, from the owner record or else from a single brand regional's callsign
+function marketingBrand(plane: Plane, operator: string, info: AircraftInfo | null): string | null {
+  let brand = ownerBrand(info)
+  if (brand === null && plane.callsign !== null) {
+    brand = SINGLE_BRAND_REGIONALS[plane.callsign.slice(0, 3)] ?? null
+  }
+  if (brand === null) {
     return null
   }
   if (brand.toLowerCase() === operator.toLowerCase()) {
@@ -61,7 +72,7 @@ function marketingBrand(operator: string, info: AircraftInfo | null): string | n
 export function flightTitle(plane: Plane, route: Route | null, info: AircraftInfo | null): string {
   const number = flightNumber(plane.callsign)
   if (number !== null && route !== null && route.airline !== null) {
-    const brand = marketingBrand(route.airline, info)
+    const brand = marketingBrand(plane, route.airline, info)
     if (brand !== null) {
       return `${brand} ${number}`
     }
@@ -83,7 +94,7 @@ export function operatedByLine(plane: Plane, route: Route | null, info: Aircraft
   if (number === null || route === null || route.airline === null) {
     return null
   }
-  if (marketingBrand(route.airline, info) === null) {
+  if (marketingBrand(plane, route.airline, info) === null) {
     return null
   }
   return `Operated by ${route.airline}`
@@ -96,7 +107,7 @@ export function airlineLogoCode(plane: Plane, route: Route | null, info: Aircraf
   }
 
   if (route !== null && route.airline !== null) {
-    const brand = marketingBrand(route.airline, info)
+    const brand = marketingBrand(plane, route.airline, info)
     if (brand !== null) {
       return MARKETING_BRANDS[brand]
     }
